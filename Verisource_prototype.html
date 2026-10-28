@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vérisource – Prototype interactif</title>
+<style>
+:root{--a:#3056C8;--a9:#1F3C8F;--a8:#2648B0;--a5:#7D97DE;--a3:#B9C9F1;--a2:#DCE4F8;--a1:#EEF2FC;--t:#2B2B2B;--t2:#3D3D3D;--t3:#4A4A4A;--t4:#5F5F5F;--b:#DADADA}
+*{box-sizing:border-box}
+body{margin:0;background:#F3F3F3;color:var(--t);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.titlebar{display:flex;align-items:center;gap:16px;padding:10px 16px;background:#FAFAFA;border-bottom:1px solid #E2E2E2;flex-wrap:wrap}
+.dots{display:flex;gap:8px}.dots span{width:12px;height:12px;border-radius:50%;background:#CFCFCF}
+.toggle{width:30px;height:16px;border-radius:999px;background:var(--a);position:relative;display:inline-block}.toggle:after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--b);border-radius:6px;padding:5px 10px;color:#6B6B6B;font-size:12px;background:#fff}
+.tabs{display:flex;align-items:flex-end;gap:4px;padding:0 16px;background:#FAFAFA;flex-wrap:wrap}
+.tabs .t{font-size:13px;color:var(--t2);background:transparent;border:0;padding:10px 12px}
+.tabs .t.on{font-weight:700;color:var(--a8);border-bottom:3px solid var(--a);padding-bottom:7px}
+.ribbon{display:flex;align-items:stretch;padding:8px 16px;background:#fff;border-top:1px solid #E2E2E2;border-bottom:1px solid #E2E2E2;flex-wrap:wrap;row-gap:8px}
+.grp{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;padding:0 14px;border-right:1px solid #E8E8E8}.grp:last-child{border-right:0}
+.grp .cap{font-size:11px;color:#6B6B6B}
+.rb{font-size:12px;color:var(--t2);background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 10px;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.rb.on{color:var(--a9);background:var(--a1);border-color:var(--a2)}
+.rb.primary{color:#fff;background:var(--a);border:0;font-weight:600;padding:8px 14px}
+.main{flex:1;display:flex;flex-wrap:wrap;align-items:stretch}
+.docarea{flex:999 1 700px;min-width:0;background:#E6E6E6;padding:28px 24px 40px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.page{width:680px;max-width:100%;background:#fff;box-shadow:0 1px 4px rgba(40,40,40,.18);padding:56px 72px 48px;font-family:Aptos,Calibri,Carlito,"Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.65}
+.page h1{margin:0 0 18px;font-size:22px;font-weight:600;color:var(--a9);line-height:1.3}
+.page h2{margin:18px 0 8px;font-size:16px;font-weight:600;color:var(--t2)}
+.page p{margin:0 0 12px;text-align:justify}
+.hl{color:inherit;margin:0;border:0;border-radius:2px;display:inline;text-align:left;white-space:normal;overflow-wrap:anywhere;line-height:inherit;padding:0;background:transparent;cursor:text;font:inherit}
+.hl.err{cursor:pointer;padding:0 2px;background:#E6ECFA;text-decoration:underline wavy var(--a);text-underline-offset:3px}
+.hl.warn{cursor:pointer;padding:0 2px;text-decoration:underline dashed var(--a);text-decoration-thickness:2px;text-underline-offset:3px}
+.hl.act{cursor:pointer;padding:0 2px;background:#C9D6F5;text-decoration:underline wavy var(--a9);text-underline-offset:3px}
+.fixed{background:var(--a1);border-radius:2px;padding:0 2px}
+.notes{margin-top:8px;font-size:12px;line-height:1.5;display:flex;flex-direction:column;gap:5px;color:var(--t2)}
+.note{padding:2px 0}.note.on{background:var(--a2);border-radius:4px;padding:2px 4px;margin:0 -4px}
+.card{margin:2px 0 18px;border:1px solid var(--a3);border-radius:8px;background:#fff;box-shadow:0 6px 20px rgba(40,40,40,.12);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;line-height:1.45;overflow:hidden;text-align:left}
+.card.panel{margin:0;border:2px solid var(--a);box-shadow:none;border-radius:10px}
+.card .hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--a1);border-bottom:1px solid var(--a2);flex-wrap:wrap}
+.card .ty{font-weight:700;color:var(--a9)}
+.pill{font-size:11px;color:var(--t2);padding:1px 8px;border:1px solid var(--a3);border-radius:999px;background:#fff}
+.card .loc{margin-left:auto;color:var(--t4);font-size:12px}
+.x{background:transparent;border:0;padding:4px;color:var(--t4);display:flex}
+.card .bd{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.card .ti{font-weight:600}
+.ext{background:#F5F5F5;border-radius:6px;padding:8px 10px;color:var(--t2);font-size:12.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.bp{font-size:13px;font-weight:600;color:#fff;background:var(--a);border:0;border-radius:6px;padding:8px 12px;min-height:36px;text-align:left}
+.bs{font-size:13px;color:var(--a8);background:#fff;border:1px solid var(--a3);border-radius:6px;padding:8px 12px;min-height:36px}
+.bg{font-size:13px;color:var(--t3);background:#fff;border:1px solid var(--b);border-radius:6px;padding:8px 12px;min-height:36px}
+.comments{width:250px;display:flex;flex-direction:column;gap:12px;padding-top:120px}
+.cm{background:#fff;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 3px rgba(40,40,40,.12);border:1px solid var(--b)}
+.cm.on{border:2px solid var(--a)}
+.av{width:26px;height:26px;border-radius:50%;background:var(--a);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.cm .msg{font-size:12.5px;line-height:1.45;color:var(--t2)}
+.cmb1{font-size:12px;font-weight:600;color:var(--a8);background:var(--a1);border:0;border-radius:6px;padding:6px 10px}
+.cmb2{font-size:12px;color:var(--t3);background:transparent;border:1px solid var(--b);border-radius:6px;padding:6px 10px}
+aside{flex:1 1 380px;max-width:420px;min-width:0;background:#fff;border-left:1px solid var(--b);display:flex;flex-direction:column}
+.ph{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #E8E8E8}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--a);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.ptabs{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid #E8E8E8;flex-wrap:wrap}
+.ptab{font-size:13px;background:transparent;border:0;padding:12px 8px 9px;color:var(--t3);border-bottom:3px solid transparent}
+.ptab.on{color:var(--a9);font-weight:700;border-bottom-color:var(--a)}
+.pbody{flex:1;padding:16px;display:flex;flex-direction:column;gap:16px}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:32px 12px;border:1px dashed var(--a3);border-radius:10px;background:#F7F9FE}
+.big{font-size:14px;font-weight:600;color:#fff;background:var(--a);border:0;border-radius:8px;padding:10px 18px;min-height:44px}
+.scorebox{display:flex;align-items:center;gap:16px;padding:16px;border:1px solid var(--a2);border-radius:10px;background:#F7F9FE}
+.ring{width:88px;height:88px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center}
+.ring>div{width:72px;height:72px;border-radius:50%;background:#F7F9FE;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--a9)}
+.lbl{font-size:12px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.mrow{text-align:left;display:flex;align-items:center;gap:10px;background:#fff;border:0;border-bottom:1px solid #EEE;padding:10px 4px;color:var(--t);width:100%}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}.dot.e{background:var(--a)}.dot.w{background:#fff;border:2px solid var(--a)}.dot.n{background:#D5D5D5}
+.soft{font-size:13px;font-weight:600;color:var(--a8);background:var(--a1);border:1px solid var(--a2);border-radius:8px;padding:10px 14px;min-height:44px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;border-radius:999px;padding:5px 10px;background:#fff;color:var(--t2);border:1px solid #CFCFCF}.chip.on{background:var(--a);color:#fff;border-color:var(--a)}
+.prow{text-align:left;display:flex;align-items:center;gap:10px;width:100%;border-radius:8px;padding:10px;background:#fff;border:1px solid #E8E8E8;margin-bottom:6px}
+.prow.on{background:var(--a1);border-color:var(--a3)}
+.ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ok{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--a9);background:var(--a1);border-radius:8px;padding:12px}
+.done{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--t3);padding:6px 4px;border-bottom:1px solid #F0F0F0}
+.field{font:inherit;font-size:13px;border:1px solid #CFCFCF;border-radius:6px;padding:8px 10px;width:100%}
+.blist{border:1px solid #E8E8E8;border-radius:8px;overflow:hidden}
+.brow{text-align:left;display:flex;align-items:center;gap:10px;width:100%;border:0;border-bottom:1px solid #EEE;padding:10px 12px;background:#fff}.brow.on{background:var(--a1)}
+.bar{display:block;height:6px;border-radius:999px;background:#E6E6E6;overflow:hidden}.bar i{display:block;height:100%}
+.sheet{border:1px solid var(--a2);border-radius:10px;padding:14px;background:#F7F9FE;display:flex;flex-direction:column;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:12px}.grid2>div{background:#fff;border-radius:6px;padding:8px}
+.lcard{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:8px;background:#fff;border:1px solid #E2E2E2}.lcard.no{border:1px dashed #8A8A8A}
+.badge{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.badge.ok{background:var(--a);color:#fff}.badge.warn{background:var(--a2);color:var(--a9)}.badge.no{background:#fff;color:var(--t2);border:1px solid #8A8A8A}.badge.pending{background:#F0F0F0;color:var(--t3)}
+.link{align-self:flex-start;font-size:12px;font-weight:600;color:var(--a8);background:transparent;border:0;padding:2px 0;text-decoration:underline}
+.toast{margin:0 16px 12px;padding:10px 12px;background:#3A3A3A;color:#fff;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px}
+.pfoot{padding:10px 16px;border-top:1px solid #E8E8E8;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--t4)}
+.status{display:flex;gap:20px;align-items:center;padding:6px 16px;background:#FAFAFA;border-top:1px solid #E2E2E2;font-size:12px;color:var(--t4);flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var I = {
+  shield: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+  book: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg>',
+  link: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.66 0l3-3a4 4 0 00-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 00-5.66 0l-3 3a4 4 0 005.66 5.66l1-1"/></svg>',
+  quote: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h4v4c0 3-2 5-4 6"/><path d="M15 7h4v4c0 3-2 5-4 6"/></svg>',
+  panel: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg>',
+  reset: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7"/><path d="M4 4v4h4"/></svg>',
+  x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>',
+  chev: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'
+};
+var ISSUES = {
+  i5: { cat: 'norme', sev: 'À vérifier', type: 'Citation non conforme', loc: 'Note 1', excerpt: 'https://www.admin.ch/fr/newnsb/6zpv…',
+    title: 'Note incomplète (APA 7)', explain: "Un lien seul ne suffit pas. Il manque l'auteur, l'année, le titre et la date de consultation.",
+    extract: "Aperçu : Conseil fédéral. ([année]). [Titre du communiqué]. admin.ch. Consulté le 20 octobre 2026, sur https://www.admin.ch/…",
+    fixLabel: 'Compléter la note au format', msg: "Note 1 : il n'y a qu'un lien. Il manque l'auteur, le titre et la date de consultation." },
+  i3: { cat: 'fiabilite', sev: 'À vérifier', type: 'Source obsolète', loc: '§2.1 · note 2', excerpt: 'favorisent la viralité de contenus courts',
+    title: 'Source trop ancienne et peu fiable', explain: "Blog publié en 2009, avant le lancement de TikTok : il ne peut pas appuyer cette affirmation. Fiabilité 24/100.",
+    extract: "Remplacements proposés : Reuters Institute – Digital News Report 2025 (88/100) · ZHAW – Rapport JAMES 2024, source suisse (90/100)",
+    fixLabel: 'Remplacer par le Digital News Report 2025', msg: "Source de 2009, antérieure à TikTok. 2 sources récentes et fiables sont proposées." },
+  i1: { cat: 'chiffres', sev: 'Erreur', type: 'Chiffre inexact', loc: '§2.2 · note 3', excerpt: '7 fois plus de chances',
+    title: 'Le chiffre ne reflète pas la source', explain: "Vosoughi et al. indiquent que les fausses nouvelles ont 70 % de chances en plus d'être repartagées, et non 7 fois plus.",
+    extract: "Source (Science, 2018, p. 1146) : « falsehoods were 70% more likely to be retweeted than the truth »",
+    fixLabel: 'Remplacer par « 70 % de chances en plus »', msg: "Le chiffre ne correspond pas à la note 3 : la source dit +70 %, pas « 7 fois plus »." },
+  i2: { cat: 'manquante', sev: 'Erreur', type: 'Affirmation sans source', loc: '§2.2', excerpt: "une étude de l'Université de Zurich",
+    title: 'Source manquante et attribution erronée', explain: "Ce résultat (« six fois plus vite ») vient de l'étude du MIT déjà citée en note 3, pas de l'Université de Zurich.",
+    extract: "Trouvé dans ta bibliothèque : Vosoughi, Roy & Aral (2018), Science – fiabilité 94/100.",
+    fixLabel: 'Corriger et lier à la note 3', msg: "Aucune source. Ce résultat vient du MIT (note 3), pas de l'Université de Zurich." },
+  i4: { cat: 'introuvable', sev: 'Erreur', type: 'Source introuvable', loc: '§2.3 · note 4', excerpt: "l'exposition répétée aux fake news réduit la mémoire…",
+    title: 'Cette source semble inventée', explain: "La revue « Journal of Swiss Cognitive Research » et son article n'existent dans aucune base (Crossref, Google Scholar). C'est typique d'une référence générée par une IA.",
+    extract: "Source réelle proche : Pennycook, Cannon & Rand (2018) – l'exposition répétée augmente la crédibilité perçue d'une fausse information (91/100).",
+    fixLabel: 'Remplacer par Pennycook et al. (2018) et reformuler', msg: "Revue et article introuvables. Référence possiblement inventée par une IA." },
+  i6: { cat: 'manquante', sev: 'Erreur', type: 'Chiffre sans source', loc: '§2.3', excerpt: '78 milliards de dollars',
+    title: 'Ce chiffre doit être sourcé', explain: "Un montant chiffré doit toujours renvoyer à une source. Vérisource a retrouvé l'origine de ce chiffre.",
+    extract: "Cavazos, R. (2019). The Economic Cost of Bad Actors on the Internet. University of Baltimore & CHEQ – 62/100 (étude commandée par une entreprise).",
+    fixLabel: 'Ajouter la note de bas de page 5', msg: "Chiffre sans source. Origine retrouvée : Cavazos (2019), à ajouter en note." }
+};
+var ORDER = ['i5', 'i3', 'i1', 'i2', 'i4', 'i6'];
+var CATS = [['tous', 'Tous'], ['chiffres', 'Chiffres'], ['manquante', 'Sans source'], ['fiabilite', 'Fiabilité'], ['introuvable', 'Introuvable'], ['norme', 'Norme']];
+var METRICS = [['chiffres', 'Chiffres qui ne reflètent pas la source'], ['manquante', 'Citations ou chiffres sans source'], ['fiabilite', 'Sources obsolètes ou peu fiables'], ['introuvable', 'Sources introuvables (IA ?)'], ['norme', 'Notes non conformes à la norme']];
+var BIBLIO = [
+  { id: 'b1', short: 'Vosoughi, Roy & Aral (2018)', title: 'The spread of true and false news online', kind: 'Article scientifique · Science · utilisé en note 3', score: 94, full: 'Science, 359(6380), 1146-1151.', age: '8 ans', pub: 'Revue scientifique', peer: 'Oui', link: 'DOI vérifié', note: "Étude de référence sur la diffusion des fausses nouvelles. Encore très citée." },
+  { id: 'b2', short: 'Pennycook, Cannon & Rand (2018)', title: 'Prior exposure increases perceived accuracy of fake news', kind: 'Article scientifique · J. of Exp. Psychology', score: 91, full: 'Journal of Experimental Psychology: General, 147(12), 1865-1880.', age: '8 ans', pub: 'Revue scientifique', peer: 'Oui', link: 'DOI vérifié', note: "Montre l'« effet de vérité illusoire » : une info vue plusieurs fois paraît plus vraie." },
+  { id: 'b3', short: 'ZHAW – Rapport JAMES (2024)', title: 'Jeunes, activités, médias – enquête Suisse', kind: 'Rapport institutionnel · Source suisse', score: 90, full: 'Haute école des sciences appliquées de Zurich (ZHAW).', age: '2 ans', pub: 'Haute école suisse', peer: 'Méthode publiée', link: 'Lien actif', note: "Source suisse sur les usages médias des jeunes, mise à jour tous les deux ans." },
+  { id: 'b4', short: 'Newman et al. (2025)', title: 'Digital News Report 2025', kind: 'Rapport · Reuters Institute', score: 88, full: "Reuters Institute for the Study of Journalism, Université d'Oxford.", age: '1 an', pub: 'Institut universitaire', peer: 'Méthode publiée', link: 'Lien actif', note: "Rapport annuel sur la consommation d'actualité, dont un chapitre sur TikTok." },
+  { id: 'b5', short: 'Conseil fédéral', title: 'Communiqué sur la désinformation', kind: 'Document officiel · Source suisse · note 1', score: 85, full: 'admin.ch – communiqué du Conseil fédéral.', age: '[année]', pub: 'Administration fédérale', peer: 'Non applicable', link: 'Lien actif', note: "Source officielle fiable, mais la note de bas de page est incomplète." },
+  { id: 'b6', short: 'Cavazos (2019)', title: 'The Economic Cost of Bad Actors on the Internet', kind: 'Rapport commandé par une entreprise', score: 62, full: 'University of Baltimore & CHEQ.', age: '7 ans', pub: 'Université + entreprise', peer: 'Non', link: 'Lien actif', note: "Chiffre largement repris, mais l'étude a été financée par une entreprise du secteur : à présenter comme une estimation." },
+  { id: 'b7', short: 'Dupont (2009)', title: 'Internet et les jeunes', kind: 'Blog · utilisé en note 2', score: 24, full: 'Blog Éducation & Numérique.', age: '17 ans', pub: 'Blog personnel', peer: 'Non', link: 'Lien mort', note: "Trop ancien pour parler des réseaux sociaux actuels. Remplacement conseillé." },
+  { id: 'b8', short: 'Martin & Keller (2023)', title: 'Fake news et cerveau adolescent', kind: 'Référence introuvable · note 4', score: 0, full: 'Journal of Swiss Cognitive Research, 12(4), 45-67.', age: '—', pub: 'Revue inexistante', peer: '—', link: 'Introuvable', note: "Aucune trace de cette revue ni de cet article. Probablement inventé par une IA." }
+];
+var LINK_RESULTS = {
+  reuters: { badge: 'Placée · note 2', kind: 'ok', score: 88, text: "Remplace Dupont (2009) au §2.1, après « favorisent la viralité de contenus courts ».", note: 2 },
+  ubalt: { badge: 'Placée · note 5', kind: 'warn', score: 62, text: "Ajoutée au §2.3 après « 78 milliards de dollars ». À présenter comme une estimation (étude commandée).", note: 5 },
+  science: { badge: 'Déjà citée · note 3', kind: 'ok', score: 94, text: "Cette source est déjà dans ton document. Aucun doublon créé.", note: 3 },
+  tiktok: { badge: 'Non placée', kind: 'no', score: 8, text: "Vidéo de réseau social : elle ne peut pas servir de source académique. Cherche l'étude ou l'article d'origine.", note: 0 },
+  custom: { badge: 'À placer', kind: 'warn', score: 0, text: "Aucun passage correspondant trouvé. Choisis un passage dans le texte pour l'y placer.", note: 0 }
+};
+function initialState() {
+  return { scanned: false, tab: 'apercu', panel: true, fixed: {}, ignored: {}, active: null, filter: 'tous', placed: false,
+    linkInput: '', norme: 'APA 7', toast: '', biblioSel: 'b1', biblioQuery: '', focusNote: 0,
+    links: [
+      { key: 'reuters', url: 'https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2025' },
+      { key: 'ubalt', url: 'https://www.ubalt.edu/…/economic-cost-of-fake-news.pdf' },
+      { key: 'science', url: 'https://www.science.org/doi/10.1126/science.aap9559' },
+      { key: 'tiktok', url: 'https://www.tiktok.com/@infos.rapides/video/7290…' }
+    ] };
+}
+var S = initialState(), timer = null;
+function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function set(p) { Object.assign(S, p); render(); }
+function flash(msg) { clearTimeout(timer); timer = setTimeout(function () { S.toast = ''; render(); }, 2800); return msg; }
+function pending(id) { return S.scanned && !S.fixed[id] && !S.ignored[id]; }
+function pendingIds() { return ORDER.filter(pending); }
+function pct() { return Math.round(100 * (2 + ORDER.filter(function (id) { return S.fixed[id]; }).length) / 8); }
+
+var A = {
+  scan: function () { var was = S.scanned; set({ scanned: true, panel: true, tab: 'apercu', active: null, toast: flash(was ? 'Analyse mise à jour' : 'Analyse terminée : 6 points à vérifier') }); },
+  open: function (id) { if (!S.scanned) return; set({ active: S.active === id ? null : id, tab: 'problemes', panel: true, filter: 'tous', focusNote: 0 }); },
+  fix: function (id) { S.fixed[id] = true; set({ active: null, toast: flash('Correction appliquée : ' + ISSUES[id].type.toLowerCase() + ' résolu') }); },
+  ignore: function (id) { S.ignored[id] = true; set({ active: null, toast: flash('Point ignoré – tu pourras le retrouver dans « Ignorés »') }); },
+  close: function () { set({ active: null }); },
+  view: function () { set({ toast: flash("La source s'ouvre dans ton navigateur") }); },
+  tab: function (t) { set({ tab: t, panel: true }); },
+  panel: function () { set({ panel: !S.panel }); },
+  cite: function () { set({ toast: flash('Citation insérée au curseur (' + S.norme + ')') }); },
+  filter: function (c) { set({ filter: c }); },
+  metric: function (c) { set({ tab: 'problemes', filter: c, active: null }); },
+  fixAll: function () { ORDER.forEach(function (id) { if (!S.ignored[id]) S.fixed[id] = true; }); set({ active: null, toast: flash('Toutes les corrections ont été appliquées') }); },
+  bsel: function (id) { set({ biblioSel: id }); },
+  addLink: function () { var v = (S.linkInput || '').trim(); if (!v) return; S.links = S.links.concat([{ key: 'custom', url: v }]); set({ linkInput: '', toast: flash('Lien ajouté à la boîte') }); },
+  place: function () { S.fixed.i3 = true; S.fixed.i6 = true; set({ placed: true, scanned: true, active: null, toast: flash('2 sources placées dans le texte · 1 lien refusé') }); },
+  jump: function (n) { set({ focusNote: +n, toast: flash('Note ' + n + ' mise en évidence dans le document') }); },
+  reset: function () { clearTimeout(timer); S = initialState(); render(); }
+};
+
+function hl(id, text) {
+  var p = pending(id), cls = 'hl';
+  if (p && S.active === id) cls += ' act'; else if (p && ISSUES[id].sev === 'Erreur') cls += ' err'; else if (p) cls += ' warn';
+  return '<button class="' + cls + '" data-a="open" data-v="' + id + '">' + text + '</button>';
+}
+function sw(id, orig, fixed) { return S.fixed[id] ? '<span class="fixed">' + fixed + '</span>' : hl(id, orig); }
+function card(id, inPanel) {
+  var it = ISSUES[id];
+  var label = id === 'i5' ? it.fixLabel + ' ' + S.norme : it.fixLabel;
+  return '<div class="card' + (inPanel ? ' panel' : '') + '" role="dialog" aria-label="' + esc(it.type) + '"><div class="hd"><span class="ty">' + esc(it.type) + '</span><span class="pill">' + it.sev + '</span><span class="loc">' + esc(it.loc) + '</span>' +
+    (inPanel ? '' : '<button class="x" aria-label="Fermer" data-a="close">' + I.x + '</button>') + '</div><div class="bd"><div class="ti">' + esc(it.title) + '</div><div style="color:var(--t2)">' + esc(it.explain) + '</div><div class="ext">' + esc(it.extract) + '</div>' +
+    '<div class="btns"><button class="bp" data-a="fix" data-v="' + id + '">✓ ' + esc(label) + '</button><button class="bs" data-a="view">Voir la source</button><button class="bg" data-a="ignore" data-v="' + id + '">Ignorer</button></div></div></div>';
+}
+function pop(ids) { return ids.filter(function (id) { return S.active === id && pending(id); }).map(function (id) { return card(id, false); }).join(''); }
+function noteCls(n, ids) { var on = S.focusNote === n || ids.some(function (id) { return S.active === id; }); return 'note' + (on ? ' on' : ''); }
+function barColor(s) { return s >= 80 ? 'var(--a)' : (s >= 50 ? 'var(--a5)' : 'var(--a3)'); }
+
+function render() {
+  var pid = pendingIds(), P = pct(), sc = S.scanned;
+  var rb = function (t) { return 'rb' + (S.panel && S.tab === t ? ' on' : ''); };
+  var h = '';
+  h += '<div class="app"><div class="titlebar"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t4)">Enregistrement automatique <span class="toggle" aria-hidden="true"></span></div>' +
+    '<div style="flex:1;text-align:center;font-size:13px;color:var(--t2);min-width:240px"><strong style="font-weight:600">Rapport_TM_Desinformation_LeaMartin.docx</strong> <span style="color:#6B6B6B">· Dernière modification : 20 octobre</span></div>' +
+    '<div class="search">Rechercher</div></div>';
+  h += '<div class="tabs">' + ['Fichier', 'Accueil', 'Insérer', 'Conception', 'Mise en page', 'Références', 'Révision', 'Affichage'].map(function (t) { return '<button class="t">' + t + '</button>'; }).join('') +
+    '<button class="t on">Vérisource</button><div style="margin-left:auto;display:flex;gap:8px;padding-bottom:6px"><button class="bg" style="min-height:0;padding:5px 10px;font-size:12px">Commentaires</button><button class="bp" style="min-height:0;padding:6px 12px;font-size:12px">Partager</button></div></div>';
+  h += '<div class="ribbon">' +
+    '<div class="grp"><button class="rb primary" data-a="scan">' + I.shield + (sc ? "Relancer l'analyse" : 'Analyser le document') + '</button><span class="cap">Analyse</span></div>' +
+    '<div class="grp"><div style="display:flex;gap:4px"><button class="' + rb('biblio') + '" data-a="tab" data-v="biblio">' + I.book + 'Bibliothèque</button><button class="' + rb('liens') + '" data-a="tab" data-v="liens">' + I.link + 'Boîte à liens</button><button class="rb" data-a="cite">' + I.quote + 'Insérer une citation</button></div><span class="cap">Sources</span></div>' +
+    '<div class="grp"><div style="display:flex;flex-direction:column;gap:4px;padding-top:4px"><label for="norme" style="font-size:12px;color:var(--t4)">Norme de citation</label><select id="norme" style="font:inherit;font-size:13px;border:1px solid #CFCFCF;border-radius:6px;padding:5px 8px;background:#fff;min-width:140px">' +
+    [['APA 7', 'APA 7e édition'], ['MLA 9', 'MLA 9'], ['ISO 690', 'ISO 690'], ['Chicago', 'Chicago']].map(function (o) { return '<option value="' + o[0] + '"' + (S.norme === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div><span class="cap">Norme</span></div>' +
+    '<div class="grp"><button class="rb on" data-a="tab" data-v="apercu" style="flex-direction:row;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2648B0" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 16a8 8 0 1116 0"/><path d="M12 16l4-5"/></svg><span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.2"><span style="font-size:11px;color:var(--t4)">Fiabilité</span><span style="font-size:18px;font-weight:700;color:var(--a9)">' + (sc ? P + ' %' : '—') + '</span></span></button><span class="cap">Score</span></div>' +
+    '<div class="grp"><div style="display:flex;gap:4px"><button class="rb" data-a="panel">' + I.panel + (S.panel ? 'Masquer le panneau' : 'Afficher le panneau') + '</button><button class="rb" data-a="reset">' + I.reset + 'Réinitialiser</button></div><span class="cap">Affichage</span></div></div>';
+
+  // Document
+  h += '<div class="main"><div class="docarea"><div class="page">' +
+    '<div style="display:flex;justify-content:space-between;font-size:11px;color:#6B6B6B;border-bottom:1px solid #E2E2E2;padding-bottom:6px;margin-bottom:28px"><span>Travail de maturité 2026 – Lea Martin</span><span>Page 4</span></div>' +
+    '<h1>2&nbsp;&nbsp;Les jeunes face à l\'information en ligne</h1>' +
+    '<h2 style="margin-top:0">2.1&nbsp;&nbsp;Des usages centrés sur les réseaux sociaux</h2>' +
+    '<p>Aujourd\'hui, les réseaux sociaux sont devenus la porte d\'entrée principale vers l\'actualité pour une grande partie des jeunes. En Suisse, la Confédération considère la désinformation comme un risque croissant pour la formation de l\'opinion<sup>1</sup>. Les plateformes comme TikTok ' + hl('i3', 'favorisent la viralité de contenus courts') + '<sup>2</sup>, ce qui laisse peu de temps à la vérification avant le partage.</p>' + pop(['i3']) +
+    '<h2>2.2&nbsp;&nbsp;La vitesse de la fausse information</h2>' +
+    '<p>Les fausses informations ne circulent pas comme les autres. Sur Twitter, les fausses nouvelles avaient ' + sw('i1', '7 fois plus de chances', '70 % de chances en plus') + ' d\'être repartagées que les vraies<sup>3</sup>. Selon ' + sw('i2', 'une étude de l\'Université de Zurich', 'cette même étude du MIT<sup>3</sup>') + ', elles atteignent aussi leur public six fois plus vite. Pour un·e élève qui prépare un travail, il devient donc difficile de distinguer une information vérifiée d\'une rumeur.</p>' + pop(['i1', 'i2']) +
+    '<h2>2.3&nbsp;&nbsp;Des effets sur les apprentissages</h2>' +
+    '<p>La désinformation n\'est pas qu\'un problème d\'opinion. Des chercheurs ont montré que ' + sw('i4', 'l\'exposition répétée aux fake news réduit la mémoire de travail', 'l\'exposition répétée à une fausse information augmente sa crédibilité perçue') + ' des adolescent·es<sup>4</sup>. Elle a aussi un coût collectif : elle coûterait chaque année ' + sw('i6', '78 milliards de dollars', '78 milliards de dollars<sup>5</sup>') + ' à l\'économie mondiale.</p>' + pop(['i4', 'i6']) +
+    '<p>Face à ce constat, la question n\'est plus seulement de savoir où chercher l\'information, mais comment vérifier rapidement qu\'elle est juste avant de l\'utiliser dans un travail scolaire.</p>' +
+    '<div style="margin-top:40px;border-top:1px solid #9A9A9A;width:160px"></div><div class="notes">' +
+    '<div class="' + noteCls(1, ['i5']) + '"><sup>1</sup> ' + sw('i5', 'https://www.admin.ch/fr/newnsb/6zpv_pRise2PU3NnFIv0n', 'Conseil fédéral. ([année]). <i>[Titre du communiqué]</i>. admin.ch. Consulté le 20 octobre 2026, sur https://www.admin.ch/fr/newnsb/6zpv_pRise2PU3NnFIv0n') + '</div>' +
+    '<div class="' + noteCls(2, ['i3']) + '"><sup>2</sup> ' + (S.fixed.i3 ? '<span class="fixed">Newman, N. et al. (2025). <i>Digital News Report 2025</i>. Reuters Institute for the Study of Journalism.</span>' : 'Dupont, M. (2009). Internet et les jeunes. <i>Blog Éducation &amp; Numérique</i>.') + '</div>' +
+    '<div class="' + noteCls(3, ['i1', 'i2']) + '"><sup>3</sup> Vosoughi, S., Roy, D. &amp; Aral, S. (2018). The spread of true and false news online. <i>Science, 359</i>(6380), 1146-1151.</div>' +
+    '<div class="' + noteCls(4, ['i4']) + '"><sup>4</sup> ' + (S.fixed.i4 ? '<span class="fixed">Pennycook, G., Cannon, T. D. &amp; Rand, D. G. (2018). Prior exposure increases perceived accuracy of fake news. <i>Journal of Experimental Psychology: General, 147</i>(12), 1865-1880.</span>' : 'Martin, L. &amp; Keller, S. (2023). Fake news et cerveau adolescent. <i>Journal of Swiss Cognitive Research, 12</i>(4), 45-67.') + '</div>' +
+    (S.fixed.i6 ? '<div class="' + noteCls(5, ['i6']) + '"><sup>5</sup> <span class="fixed">Cavazos, R. (2019). <i>The Economic Cost of Bad Actors on the Internet: Fake News</i>. University of Baltimore &amp; CHEQ.</span></div>' : '') +
+    '</div>' + (pop(['i5']) ? '<div style="margin-top:12px">' + pop(['i5']) + '</div>' : '') + '</div>';
+
+  // Comments
+  h += '<div class="comments">' + pid.map(function (id) {
+    var it = ISSUES[id];
+    return '<div class="cm' + (S.active === id ? ' on' : '') + '"><div style="display:flex;align-items:center;gap:8px"><span class="av" aria-hidden="true">V</span><span style="display:flex;flex-direction:column;line-height:1.2"><span style="font-size:12px;font-weight:700">Vérisource</span><span style="font-size:11px;color:var(--t4)">' + esc(it.type) + ' · ' + esc(it.loc) + '</span></span></div><div class="msg">' + esc(it.msg) + '</div><div style="display:flex;gap:6px"><button class="cmb1" data-a="open" data-v="' + id + '">Voir le détail</button><button class="cmb2" data-a="ignore" data-v="' + id + '">Résoudre</button></div></div>';
+  }).join('') + '</div></div>';
+
+  // Panel
+  if (S.panel) {
+    var t = function (k, l) { return '<button role="tab" class="ptab' + (S.tab === k ? ' on' : '') + '" data-a="tab" data-v="' + k + '">' + l + '</button>'; };
+    h += '<aside aria-label="Panneau Vérisource"><div class="ph"><span class="logo" aria-hidden="true">' + I.shield + '</span><span style="display:flex;flex-direction:column;line-height:1.2"><span style="font-size:16px;font-weight:700">Vérisource</span><span style="font-size:12px;color:var(--t4)">Vérification des sources · ' + S.norme + '</span></span><button class="x" style="margin-left:auto" aria-label="Fermer le panneau" data-a="panel">' + I.x + '</button></div>' +
+      '<div class="ptabs" role="tablist">' + t('apercu', 'Aperçu') + t('problemes', 'Problèmes' + (sc ? ' (' + pid.length + ')' : '')) + t('biblio', 'Bibliothèque') + t('liens', 'Boîte à liens') + '</div><div class="pbody">';
+    var needScan = '<div class="empty">' + I.shield.replace('width="20" height="20"', 'width="40" height="40"').replace('currentColor', '#3056C8') + '<div style="font-size:16px;font-weight:700">Vérifie les sources de ton travail</div><div style="font-size:13px;color:var(--t3);line-height:1.5">Vérisource contrôle les chiffres, les citations, la fiabilité et la mise en forme de tes notes de bas de page.</div><button class="big" data-a="scan">Analyser le document</button></div>';
+    if (S.tab === 'apercu') {
+      if (!sc) h += needScan;
+      else {
+        var nF = ORDER.filter(function (id) { return S.fixed[id]; }).length;
+        h += '<div class="scorebox"><div class="ring" role="img" aria-label="' + P + ' % de fiabilité" style="background:conic-gradient(#3056C8 ' + (P * 3.6) + 'deg,#DCE4F8 0deg)"><div>' + P + ' %</div></div><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;color:var(--t4)">Note de fiabilité du document</span><span style="font-size:18px;font-weight:700">' + (P < 50 ? 'Fragile' : (P < 100 ? 'À améliorer' : 'Solide')) + '</span><span style="font-size:12.5px;color:var(--t3)">' + (2 + nF) + ' éléments vérifiés sur 8 · ' + pid.length + ' à corriger</span></div></div>' +
+          '<div><div class="lbl">Détail des vérifications</div>' + METRICS.map(function (m) {
+            var n = pid.filter(function (id) { return ISSUES[id].cat === m[0]; }).length;
+            return '<button class="mrow" data-a="metric" data-v="' + m[0] + '"><span class="dot ' + (n ? 'e' : 'n') + '" aria-hidden="true"></span><span style="flex:1;font-size:13px">' + m[1] + '</span><span style="font-size:13px;font-weight:700;color:var(--a9)">' + n + '</span>' + I.chev + '</button>';
+          }).join('') + '</div><button class="soft" data-a="fixAll">Appliquer toutes les corrections proposées</button>';
+      }
+    } else if (S.tab === 'problemes') {
+      if (!sc) h += '<div style="font-size:13px;color:var(--t3);padding:16px;background:#F5F5F5;border-radius:8px">Lance d\'abord l\'analyse pour voir les problèmes de sources.<button class="bp" style="display:block;margin-top:10px" data-a="scan">Analyser le document</button></div>';
+      else {
+        var fl = pid.filter(function (id) { return S.filter === 'tous' || ISSUES[id].cat === S.filter; });
+        h += '<div class="chips">' + CATS.map(function (c) { return '<button class="chip' + (S.filter === c[0] ? ' on' : '') + '" data-a="filter" data-v="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
+        if (S.active && pending(S.active)) h += card(S.active, true);
+        h += '<div><div class="lbl">À vérifier (' + fl.length + ')</div>' + fl.map(function (id) {
+          var it = ISSUES[id];
+          return '<button class="prow' + (S.active === id ? ' on' : '') + '" data-a="open" data-v="' + id + '"><span class="dot ' + (it.sev === 'Erreur' ? 'e' : 'w') + '" aria-hidden="true"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600">' + esc(it.type) + '</span><span class="ell" style="font-size:12.5px;color:var(--t3)">« ' + esc(it.excerpt) + ' »</span></span><span style="font-size:11px;color:var(--t4);white-space:nowrap">' + esc(it.loc) + '</span></button>';
+        }).join('') + (fl.length ? '' : '<div class="ok">' + I.check + 'Plus rien à vérifier dans cette catégorie.</div>') + '</div>';
+        var done = ORDER.filter(function (id) { return S.fixed[id] || S.ignored[id]; });
+        var nI = ORDER.filter(function (id) { return S.ignored[id] && !S.fixed[id]; }).length;
+        h += '<div><div class="lbl">Résolus (' + (done.length - nI) + ') · Ignorés (' + nI + ')</div>' + done.map(function (id) {
+          return '<div class="done"><span style="color:var(--a)">' + I.check + '</span><span style="flex:1">' + esc(ISSUES[id].type) + ' – ' + esc(ISSUES[id].loc) + '</span><span style="color:var(--t4)">' + (S.fixed[id] ? 'Corrigé' : 'Ignoré') + '</span></div>';
+        }).join('') + '</div>';
+      }
+    } else if (S.tab === 'biblio') {
+      var q = S.biblioQuery.toLowerCase();
+      var list = BIBLIO.filter(function (b) { return !q || (b.short + ' ' + b.title + ' ' + b.kind).toLowerCase().indexOf(q) >= 0; });
+      h += '<div style="display:flex;flex-direction:column;gap:6px"><label for="bq" style="font-size:12px;color:var(--t4)">Rechercher dans ma bibliothèque</label><input id="bq" class="field" type="search" placeholder="Auteur, titre, année…" value="' + esc(S.biblioQuery) + '"></div>' +
+        '<div class="blist">' + list.map(function (b) {
+          return '<button class="brow' + (S.biblioSel === b.id ? ' on' : '') + '" data-a="bsel" data-v="' + b.id + '"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600">' + esc(b.short) + '</span><span class="ell" style="font-size:12px;color:var(--t3)">' + esc(b.title) + '</span><span style="font-size:11px;color:var(--t4)">' + esc(b.kind) + '</span></span><span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;width:64px"><span style="font-size:13px;font-weight:700;color:var(--a9)">' + b.score + '/100</span><span class="bar" style="width:60px"><i style="width:' + Math.max(b.score, 3) + '%;background:' + barColor(b.score) + '"></i></span></span></button>';
+        }).join('') + (list.length ? '' : '<div style="padding:12px;font-size:13px;color:var(--t4)">Aucune source trouvée.</div>') + '</div>';
+      var s = BIBLIO.filter(function (b) { return b.id === S.biblioSel; })[0];
+      if (s) h += '<div class="sheet"><div style="font-size:12px;color:var(--t4)">Fiche de fiabilité</div><div style="font-size:14px;font-weight:700">' + esc(s.short) + '</div><div style="font-size:12.5px;color:var(--t2)">' + esc(s.full) + '</div><div class="grid2"><div><div style="color:var(--t4)">Âge</div><div style="font-weight:600">' + s.age + '</div></div><div><div style="color:var(--t4)">Éditeur</div><div style="font-weight:600">' + esc(s.pub) + '</div></div><div><div style="color:var(--t4)">Relecture par les pairs</div><div style="font-weight:600">' + s.peer + '</div></div><div><div style="color:var(--t4)">Lien / DOI</div><div style="font-weight:600">' + s.link + '</div></div></div><div style="font-size:12.5px;color:var(--t2);background:#fff;border-radius:6px;padding:8px">' + esc(s.note) + '</div><div class="btns"><button class="bp" style="flex:1;text-align:center" data-a="cite">Insérer la citation</button><button class="bs" style="flex:1" data-a="view">Ouvrir la source</button></div></div>';
+    } else {
+      h += '<div style="font-size:13px;color:var(--t2);line-height:1.5">Colle ici tous les liens que tu as utilisés. Vérisource les évalue, crée la référence au bon format et la place à l\'endroit du texte qui leur correspond.</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px"><label for="lk" style="font-size:12px;color:var(--t4)">Ajouter un lien</label><div style="display:flex;gap:6px"><input id="lk" class="field" type="url" placeholder="https://…" value="' + esc(S.linkInput) + '" style="flex:1;min-width:0"><button class="soft" style="min-height:0;padding:8px 12px" data-a="addLink">Ajouter</button></div></div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px">' + S.links.map(function (l) {
+          var r = LINK_RESULTS[l.key] || LINK_RESULTS.custom, d = S.placed, kind = d ? r.kind : 'pending';
+          return '<div class="lcard' + (kind === 'no' ? ' no' : '') + '"><div style="display:flex;align-items:center;gap:8px;color:var(--t4)">' + I.link.replace('width="20" height="20"', 'width="14" height="14"') + '<span class="ell" style="flex:1;min-width:0;font-size:12px;color:var(--t2)">' + esc(l.url) + '</span><span class="badge ' + kind + '">' + (d ? r.badge : 'En attente') + '</span></div><div style="font-size:12.5px;color:var(--t2);line-height:1.45">' + esc(d ? r.text : 'Sera évaluée puis placée automatiquement au bon endroit du texte.') + '</div>' +
+            (d && l.key !== 'custom' ? '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--t4)">Fiabilité ' + r.score + '/100</span><span class="bar" style="flex:1"><i style="width:' + Math.max(r.score, 3) + '%;background:' + barColor(r.score) + '"></i></span></div>' : '') +
+            (d && r.note ? '<button class="link" data-a="jump" data-v="' + r.note + '">Voir dans le texte</button>' : '') + '</div>';
+        }).join('') + '</div><button class="big" data-a="place">' + (S.placed ? 'Analyser à nouveau' : 'Analyser et placer les sources') + '</button>';
+    }
+    h += '</div>' + (S.toast ? '<div class="toast" role="status"><span style="color:#B9C9F1">' + I.check + '</span>' + esc(S.toast) + '</div>' : '') +
+      '<div class="pfoot"><span>Analyse locale · aucune donnée partagée</span><button class="bg" style="min-height:0;padding:5px 10px;font-size:12px" data-a="reset">Réinitialiser</button></div></aside>';
+  }
+  h += '</div><div class="status"><span>Page 4 sur 18</span><span>2 314 mots</span><span>Français (Suisse)</span><span style="display:flex;align-items:center;gap:6px;color:var(--a8);font-weight:600">' +
+    (sc ? 'Vérisource : ' + pid.length + ' point(s) à vérifier · fiabilité ' + P + ' %' : 'Vérisource : document non analysé') + '</span><span style="margin-left:auto">Zoom 110 %</span></div></div>';
+
+  var foc = document.activeElement && document.activeElement.id, pos = foc && document.activeElement.selectionStart;
+  document.getElementById('app').innerHTML = h;
+  if (foc === 'bq' || foc === 'lk') { var el = document.getElementById(foc); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
+}
+
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-a]'); if (!b) return;
+  var fn = A[b.getAttribute('data-a')]; if (fn) fn(b.getAttribute('data-v'));
+});
+document.addEventListener('change', function (e) {
+  if (e.target.id === 'norme') set({ norme: e.target.value, toast: flash('Norme changée : ' + e.target.value) });
+});
+document.addEventListener('input', function (e) {
+  if (e.target.id === 'bq') set({ biblioQuery: e.target.value });
+  if (e.target.id === 'lk') S.linkInput = e.target.value;
+});
+document.addEventListener('keydown', function (e) { if (e.target.id === 'lk' && e.key === 'Enter') A.addLink(); });
+render();
+</script>
+</body>
+</html>
